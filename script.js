@@ -5,13 +5,11 @@ AFRAME.registerComponent('ios-video-fix', {
         const video = document.querySelector('#ar-video');
         
         if (video) {
-            // iOS specific video setup
             video.setAttribute('playsinline', '');
             video.setAttribute('webkit-playsinline', '');
             video.muted = true;
             video.loop = false;
             
-            // Update material when video is ready
             video.addEventListener('loadeddata', () => {
                 if (el.components.material && el.components.material.material.map) {
                     el.components.material.material.map.needsUpdate = true;
@@ -106,10 +104,11 @@ AFRAME.registerComponent('gesture-handler', {
 
 // Main application
 document.addEventListener('DOMContentLoaded', function() {
-    const scene = document.querySelector('a-scene');
+    const scene = document.querySelector('#ar-scene');
     const video = document.querySelector('#ar-video');
     const videoEntity = document.querySelector('#ar-video-entity');
     const loadingScreen = document.querySelector('#loading-screen');
+    const loadingStatus = document.querySelector('#loading-status');
     const playPauseBtn = document.querySelector('#play-pause-btn');
     const unmuteBtn = document.querySelector('#unmute-btn');
     const volumeControl = document.querySelector('#volume-control');
@@ -120,19 +119,50 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessage = document.querySelector('#error-message');
     const errorText = document.querySelector('#error-text');
     const errorClose = document.querySelector('#error-close');
+    const retryBtn = document.querySelector('#retry-btn');
 
     let isVideoPlaying = false;
     let isVideoMuted = true;
     let userInteracted = false;
+    let loadingTimeout;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     // iOS detection
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const iosVersion = isIOS ? parseFloat(navigator.userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/)?.[0]?.replace('OS ', '').replace(/_/g, '.') || '0') : 0;
     
+    console.log('Device detected:', isIOS ? `iOS ${iosVersion}` : 'Non-iOS');
+
+    // Loading timeout handler
+    function handleLoadingTimeout() {
+        loadingTimeout = setTimeout(() => {
+            if (loadingScreen.style.display !== 'none') {
+                retryCount++;
+                console.log(`Loading timeout, retry ${retryCount}/${maxRetries}`);
+                
+                if (retryCount < maxRetries) {
+                    updateLoadingStatus('Retrying AR initialization...');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showError('AR failed to load after multiple attempts. Please check your camera permissions and refresh the page.');
+                }
+            }
+        }, 15000);
+    }
+
+    function updateLoadingStatus(message) {
+        if (loadingStatus) {
+            loadingStatus.textContent = message;
+        }
+    }
+
     // Check AR support
     const checkARSupport = async () => {
         try {
             if (isIOS) {
-                const iosVersion = parseFloat(navigator.userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/)?.[0]?.replace('OS ', '').replace(/_/g, '.') || '0');
                 if (iosVersion < 11.3) {
                     return false;
                 }
@@ -150,17 +180,118 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+    // iOS specific camera setup
+    async function initIOSCamera() {
+        if (isIOS) {
+            try {
+                updateLoadingStatus('Requesting camera access...');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 640, max: 1280 },
+                        height: { ideal: 480, max: 720 },
+                        frameRate: { ideal: 30, max: 60 }
+                    }
+                });
+                
+                updateLoadingStatus('Camera access granted, initializing AR...');
+                
+                // Stop the stream - we just needed permission
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Small delay before AR initialization
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                return true;
+            } catch (err) {
+                console.error('iOS camera initialization failed:', err);
+                throw err;
+            }
+        }
+        return true;
+    }
+
+    // Scene ready detection
+    function waitForSceneReady() {
+        updateLoadingStatus('Loading AR scene...');
+        
+        // Multiple event listeners for better compatibility
+        scene.addEventListener('loaded', onSceneLoaded);
+        scene.addEventListener('renderstart', onSceneLoaded);
+        
+        // Check if already loaded
+        if (scene.hasLoaded) {
+            onSceneLoaded();
+            return;
+        }
+        
+        // Fallback check
+        let fallbackChecks = 0;
+        const fallbackInterval = setInterval(() => {
+            fallbackChecks++;
+            
+            if (scene.is('ar-mode') || scene.systems.arjs || fallbackChecks > 10) {
+                clearInterval(fallbackInterval);
+                if (fallbackChecks <= 10) {
+                    onSceneLoaded();
+                } else {
+                    console.warn('Scene loading fallback timeout');
+                    // Try to proceed anyway
+                    onSceneLoaded();
+                }
+            }
+        }, 1000);
+    }
+
+    function onSceneLoaded() {
+        console.log('AR Scene loaded successfully');
+        clearTimeout(loadingTimeout);
+        hideLoadingScreen();
+        
+        // Setup video for iOS
+        if (isIOS && video) {
+            video.muted = true;
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
+        }
+        
+        // Show instructions for first-time users
+        setTimeout(() => {
+            if (!localStorage.getItem('instructionsShown')) {
+                instructions.style.display = 'block';
+                localStorage.setItem('instructionsShown', 'true');
+            } else {
+                instructions.style.display = 'none';
+            }
+        }, 1000);
+    }
+
     // Initialize AR
     async function initAR() {
         try {
+            updateLoadingStatus('Checking device compatibility...');
+            
             const supported = await checkARSupport();
             if (!supported) {
-                showError('AR not supported on this device. Requires iOS 11.3+ with Safari or Chrome 79+ on Android.');
+                let errorMsg = 'AR not supported on this device. ';
+                if (isIOS) {
+                    errorMsg += `Detected iOS ${iosVersion}. Requires iOS 11.3+ with Safari.`;
+                } else {
+                    errorMsg += 'Requires Chrome 79+ on Android or Safari on iOS 11.3+';
+                }
+                showError(errorMsg);
                 return;
             }
 
-            // Request camera permissions
-            try {
+            // Start loading timeout
+            handleLoadingTimeout();
+
+            // iOS specific initialization
+            if (isIOS) {
+                await initIOSCamera();
+            } else {
+                updateLoadingStatus('Requesting camera access...');
                 await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'environment',
@@ -168,35 +299,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         height: { ideal: 720 }
                     } 
                 });
-                
-                scene.addEventListener('loaded', onSceneLoaded);
-                
-            } catch (err) {
-                showError(`Camera access required for AR: ${err.message}`);
-                console.error('Camera error:', err);
+                updateLoadingStatus('Camera access granted, initializing AR...');
             }
-        } catch (err) {
-            showError(`Error initializing AR: ${err.message}`);
-        }
-    }
 
-    function onSceneLoaded() {
-        console.log('AR Scene loaded');
-        hideLoadingScreen();
-        
-        // Setup video for iOS
-        if (isIOS) {
-            video.muted = true;
-            video.setAttribute('playsinline', '');
-            video.setAttribute('webkit-playsinline', '');
-        }
-        
-        // Show instructions for first-time users
-        if (!localStorage.getItem('instructionsShown')) {
-            instructions.style.display = 'block';
-            localStorage.setItem('instructionsShown', 'true');
-        } else {
-            instructions.style.display = 'none';
+            // Wait for scene to be ready
+            waitForSceneReady();
+            
+        } catch (err) {
+            clearTimeout(loadingTimeout);
+            console.error('AR initialization error:', err);
+            
+            let errorMsg = 'Error initializing AR: ';
+            if (err.name === 'NotAllowedError') {
+                errorMsg += 'Camera access denied. Please allow camera permissions and refresh.';
+            } else if (err.name === 'NotFoundError') {
+                errorMsg += 'No camera found on device.';
+            } else {
+                errorMsg += err.message;
+            }
+            
+            showError(errorMsg);
         }
     }
 
@@ -215,8 +337,17 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.classList.add('hidden');
     });
 
+    retryBtn.addEventListener('click', () => {
+        errorMessage.classList.add('hidden');
+        loadingScreen.style.display = 'flex';
+        retryCount = 0;
+        initAR();
+    });
+
     // Video tap to play/pause
-    videoEntity.addEventListener('click', togglePlayPause);
+    if (videoEntity) {
+        videoEntity.addEventListener('click', togglePlayPause);
+    }
 
     // Functions
     function hideLoadingScreen() {
@@ -297,26 +428,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Video event handlers
-    video.addEventListener('loadedmetadata', () => {
-        console.log('Video metadata loaded');
-    });
+    if (video) {
+        video.addEventListener('loadedmetadata', () => {
+            console.log('Video metadata loaded');
+        });
 
-    video.addEventListener('canplay', () => {
-        console.log('Video can play');
-        if (isIOS && videoEntity.components.material && videoEntity.components.material.material.map) {
-            videoEntity.components.material.material.map.needsUpdate = true;
-        }
-    });
+        video.addEventListener('canplay', () => {
+            console.log('Video can play');
+            if (isIOS && videoEntity.components.material && videoEntity.components.material.material.map) {
+                videoEntity.components.material.material.map.needsUpdate = true;
+            }
+        });
 
-    video.addEventListener('error', (e) => {
-        console.error('Video error:', e);
-        showError('Video failed to load. Please check your video file.');
-    });
+        video.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            showError('Video failed to load. Please check your video file.');
+        });
 
-    video.addEventListener('ended', () => {
-        isVideoPlaying = false;
-        playPauseBtn.textContent = '▶️';
-    });
+        video.addEventListener('ended', () => {
+            isVideoPlaying = false;
+            playPauseBtn.textContent = '▶️';
+        });
+    }
 
     // Prevent default touch behaviors
     document.addEventListener('touchmove', (e) => {
@@ -332,5 +465,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: false });
 
     // Start AR initialization
+    console.log('Starting AR initialization...');
     initAR();
 });
