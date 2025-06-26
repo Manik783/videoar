@@ -46,8 +46,14 @@ body {
 
 #loading-screen p {
     font-size: 16px;
-    margin: 0;
+    margin: 10px 0;
     text-align: center;
+}
+
+#loading-status {
+    font-size: 14px;
+    color: #3498db;
+    margin-top: 10px;
 }
 
 /* AR Scene */
@@ -251,6 +257,7 @@ a-scene {
     transition: all 0.3s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    margin: 5px;
 }
 
 #error-message button:hover,
@@ -258,6 +265,16 @@ a-scene {
     background: linear-gradient(135deg, #c0392b, #a93226);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+#retry-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9) !important;
+}
+
+#retry-btn:hover,
+#retry-btn:active {
+    background: linear-gradient(135deg, #2980b9, #1f5f8b) !important;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3) !important;
 }
 
 /* iOS Safari specific fixes */
