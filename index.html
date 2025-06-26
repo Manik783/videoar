@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Web AR Video Experience</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <p>Loading AR Experience...</p>
+    </div>
+
+    <!-- AR Scene -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <a-assets>
+            <video 
+                id="ar-video" 
+                src="assets/video.mp4" 
+                preload="metadata" 
+                crossorigin="anonymous"
+                muted
+                playsinline
+                webkit-playsinline>
+            </video>
+        </a-assets>
+
+        <!-- AR Video Entity -->
+        <a-video 
+            id="ar-video-entity"
+            src="#ar-video"
+            width="2" 
+            height="1"
+            position="0 0 -1"
+            rotation="0 0 0"
+            loop="false"
+            material="transparent: true"
+            gesture-handler="minScale: 0.5; maxScale: 3;">
+        </a-video>
+
+        <!-- Camera -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- UI Controls -->
+    <div id="ui-controls">
+        <button id="play-pause-btn" class="control-btn">▶️</button>
+        <button id="unmute-btn" class="control-btn">🔊</button>
+        <input type="range" id="volume-control" min="0" max="1" step="0.1" value="1">
+        <button id="fullscreen-btn" class="control-btn">⛶</button>
+        <button id="exit-ar-btn" class="control-btn">✕</button>
+    </div>
+
+    <!-- Instructions Overlay -->
+    <div id="instructions">
+        <h2>AR Video Controls</h2>
+        <p>• Tap "Play" to start video</p>
+        <p>• Tap "Sound" to unmute</p>
+        <p>• Pinch to scale video</p>
+        <p>• Drag to move video</p>
+        <button id="close-instructions">Got it!</button>
+    </div>
+
+    <!-- Error Messages -->
+    <div id="error-message" class="hidden">
+        <p id="error-text"></p>
+        <button id="error-close">OK</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

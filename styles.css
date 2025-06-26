@@ -1,0 +1,449 @@
+/* Base Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    background-color: #000;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: white;
+    transition: opacity 0.5s ease;
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loading-screen p {
+    font-size: 16px;
+    margin: 0;
+    text-align: center;
+}
+
+/* AR Scene */
+a-scene {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* UI Controls */
+#ui-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    z-index: 10;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.control-btn {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.control-btn:hover,
+.control-btn:active {
+    background: rgba(52, 152, 219, 0.8);
+    transform: scale(1.1);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+#volume-control {
+    width: 100px;
+    height: 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    padding: 5px 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+#volume-control::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3498db;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#volume-control::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3498db;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#volume-control::-webkit-slider-track {
+    background: rgba(255, 255, 255, 0.3);
+    height: 4px;
+    border-radius: 2px;
+}
+
+#volume-control::-moz-range-track {
+    background: rgba(255, 255, 255, 0.3);
+    height: 4px;
+    border-radius: 2px;
+    border: none;
+}
+
+/* Instructions Overlay */
+#instructions {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 320px;
+    text-align: center;
+    z-index: 20;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+#instructions h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #3498db;
+}
+
+#instructions p {
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+#instructions button {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    margin-top: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#instructions button:hover,
+#instructions button:active {
+    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+/* Error Messages */
+#error-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 30;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#error-message.hidden {
+    display: none;
+}
+
+#error-text {
+    margin-bottom: 30px;
+    text-align: center;
+    max-width: 90%;
+    font-size: 18px;
+    line-height: 1.5;
+    color: #e74c3c;
+}
+
+#error-message button,
+#error-message #reload-btn {
+    background: linear-gradient(135deg, #007AFF, #0062CC);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    margin: 10px 0;
+    display: block;
+    width: 100%;
+    max-width: 300px;
+}
+
+#error-text {
+    margin-bottom: 30px;
+    text-align: center;
+    max-width: 90%;
+    font-size: 18px;
+    line-height: 1.5;
+    color: #e74c3c;
+    white-space: pre-line;
+}
+
+#error-message ol,
+#error-message ul {
+    text-align: left;
+    margin: 15px auto;
+    max-width: 80%;
+}
+
+#error-message li {
+    margin-bottom: 8px;
+}
+
+#error-message button:hover,
+#error-message button:active {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    body {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    #ui-controls {
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+    
+    .control-btn {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    #ui-controls {
+        bottom: 10px;
+        gap: 10px;
+        padding: 0 15px;
+    }
+    
+    .control-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+    
+    #volume-control {
+        width: 80px;
+        height: 25px;
+    }
+    
+    #instructions {
+        max-width: 280px;
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    #instructions h2 {
+        font-size: 20px;
+    }
+    
+    #instructions p {
+        font-size: 14px;
+    }
+    
+    #error-text {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    #ui-controls {
+        gap: 8px;
+        padding: 0 10px;
+    }
+    
+    .control-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    #volume-control {
+        width: 60px;
+        height: 20px;
+    }
+    
+    #instructions {
+        max-width: 260px;
+        padding: 15px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+    #ui-controls {
+        bottom: 5px;
+        gap: 8px;
+    }
+    
+    .control-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    #volume-control {
+        width: 60px;
+        height: 20px;
+    }
+    
+    #instructions {
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .loader {
+        border-width: 3px;
+    }
+    
+    .control-btn {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    #instructions {
+        background: rgba(20, 20, 20, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    
+    #error-message {
+        background: rgba(10, 10, 10, 0.98);
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .loader {
+        animation: none;
+        border: 5px solid #3498db;
+    }
+    
+    .control-btn,
+    #instructions button,
+    #error-message button {
+        transition: none;
+    }
+    
+    .control-btn:hover,
+    .control-btn:active,
+    #instructions button:hover,
+    #instructions button:active,
+    #error-message button:hover,
+    #error-message button:active {
+        transform: none;
+    }
+}
+
+/* Focus styles for accessibility */
+.control-btn:focus,
+#instructions button:focus,
+#error-message button:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+#volume-control:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
