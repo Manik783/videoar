@@ -170,6 +170,7 @@ a-scene {
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: none;
 }
 
 #instructions h2 {
@@ -238,9 +239,8 @@ a-scene {
     color: #e74c3c;
 }
 
-#error-message button,
-#error-message #reload-btn {
-    background: linear-gradient(135deg, #007AFF, #0062CC);
+#error-message button {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -251,31 +251,6 @@ a-scene {
     transition: all 0.3s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    margin: 10px 0;
-    display: block;
-    width: 100%;
-    max-width: 300px;
-}
-
-#error-text {
-    margin-bottom: 30px;
-    text-align: center;
-    max-width: 90%;
-    font-size: 18px;
-    line-height: 1.5;
-    color: #e74c3c;
-    white-space: pre-line;
-}
-
-#error-message ol,
-#error-message ul {
-    text-align: left;
-    margin: 15px auto;
-    max-width: 80%;
-}
-
-#error-message li {
-    margin-bottom: 8px;
 }
 
 #error-message button:hover,
@@ -361,77 +336,6 @@ a-scene {
     #instructions {
         max-width: 260px;
         padding: 15px;
-    }
-}
-
-/* Landscape orientation adjustments */
-@media (orientation: landscape) and (max-height: 500px) {
-    #ui-controls {
-        bottom: 5px;
-        gap: 8px;
-    }
-    
-    .control-btn {
-        width: 35px;
-        height: 35px;
-        font-size: 14px;
-    }
-    
-    #volume-control {
-        width: 60px;
-        height: 20px;
-    }
-    
-    #instructions {
-        max-width: 400px;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-}
-
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .loader {
-        border-width: 3px;
-    }
-    
-    .control-btn {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    #instructions {
-        background: rgba(20, 20, 20, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    
-    #error-message {
-        background: rgba(10, 10, 10, 0.98);
-    }
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-    .loader {
-        animation: none;
-        border: 5px solid #3498db;
-    }
-    
-    .control-btn,
-    #instructions button,
-    #error-message button {
-        transition: none;
-    }
-    
-    .control-btn:hover,
-    .control-btn:active,
-    #instructions button:hover,
-    #instructions button:active,
-    #error-message button:hover,
-    #error-message button:active {
-        transform: none;
     }
 }
 
